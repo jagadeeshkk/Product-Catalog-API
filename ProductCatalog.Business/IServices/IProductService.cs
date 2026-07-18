@@ -7,8 +7,8 @@ namespace ProductCatalog.API.Business.IRepository
 {
     public interface IProductService
     {
-        Task<List<Product>> GetAllProducts();
-        Task<ProductDetail> GetProductbyID(int id);
-        Task<Metrics> GetProductAnalytics();
+        Task<List<Product>> GetAllProductsAsync();
+        Task<ProductDetail> GetProductByIdAsync(int id);
+        Task<Metrics> GetProductMetricsAsync();
     }
 }

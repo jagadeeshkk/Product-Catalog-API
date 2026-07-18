@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace ProductCatalog.API.Data
 {
-    public static class DBSeeder
+    public static class DbSeeder
     {
         public static async Task SeedAsync(ProductCatalogDbContext context, ILogger logger)
         {

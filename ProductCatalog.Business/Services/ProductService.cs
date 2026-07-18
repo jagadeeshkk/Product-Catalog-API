@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using ProductCatalog.API.Business.IRepository;
 using ProductCatalog.API.Data;
+using ProductCatalog.API.Utility.Exception;
 using ProductCatalog.API.Utility.Model;
 using System;
 using System.Collections.Generic;
@@ -11,22 +13,35 @@ namespace ProductCatalog.API.Business.Repository
     public class ProductService : IProductService
     {
         private readonly ProductCatalogDbContext _context;
-        public ProductService(ProductCatalogDbContext context)
+        private readonly ILogger<ProductService> _logger;
+        public ProductService(ProductCatalogDbContext context, ILogger<ProductService> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
-        public async Task<List<Product>> GetAllProducts()
+        public async Task<List<Product>> GetAllProductsAsync()
         {
-            return await _context.Products.ToListAsync();
+            return await _context.ProductDetails
+                .AsNoTracking()
+                .OrderBy(p => p.Id)
+                .Select(p => new Product
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Summary = p.Summary,
+                    ImageUrl = p.ImageUrl
+                })
+                .ToListAsync();
         }
 
-        public async Task<ProductDetail> GetProductbyID(int id)
+        public async Task<ProductDetail> GetProductByIdAsync(int id)
         {
-            return await _context.ProductDetails.Where(x=>x.Id.Equals(id)).FirstOrDefaultAsync();
+            var product = await _context.ProductDetails.Where(x => x.Id.Equals(id)).FirstOrDefaultAsync();
+            return product ?? throw NotFoundException.ForProduct(id);
         }
 
-        public async Task<Metrics> GetProductAnalytics()
+        public async Task<Metrics> GetProductMetricsAsync()
         {
             var dbProducts = await _context.ProductDetails
         .AsNoTracking()
@@ -39,7 +54,6 @@ namespace ProductCatalog.API.Business.Repository
                 return metrics;
             }
 
-            // 2. Parse the string components into computable numeric amounts and unit tags
             var parsedProducts = dbProducts.Select(p =>
             {
                 decimal numericPrice = 0m;
@@ -96,14 +110,15 @@ namespace ProductCatalog.API.Business.Repository
                     Title = leastExpensiveItem.Source.Title,
                     Price = leastExpensiveItem.Source.Price
                 },
-                ByPriceUnitProduct = new ByPriceUnit { 
-                    LB= byPriceUnit.Where(x=>x.Key.Equals("/lb")).Select(x=>x.Value).FirstOrDefault(),
+                ByPriceUnitProduct = new ByPriceUnit
+                {
+                    LB = byPriceUnit.Where(x => x.Key.Equals("/lb")).Select(x => x.Value).FirstOrDefault(),
                     Each = byPriceUnit.Where(x => x.Key.Equals("/each")).Select(x => x.Value).FirstOrDefault(),
                     Bunch = byPriceUnit.Where(x => x.Key.Equals("/bunch")).Select(x => x.Value).FirstOrDefault(),
                     Head = byPriceUnit.Where(x => x.Key.Equals("/head")).Select(x => x.Value).FirstOrDefault(),
                     Bag = byPriceUnit.Where(x => x.Key.Equals("/bag")).Select(x => x.Value).FirstOrDefault()
                 }
-            }; 
+            };
 
             return analytics;
         }
