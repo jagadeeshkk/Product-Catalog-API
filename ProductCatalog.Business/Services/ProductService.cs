@@ -22,7 +22,8 @@ namespace ProductCatalog.API.Business.Repository
 
         public async Task<List<Product>> GetAllProductsAsync()
         {
-            return await _context.ProductDetails
+            _logger.LogDebug("Fetching all products");
+            var products = await _context.ProductDetails
                 .AsNoTracking()
                 .OrderBy(p => p.Id)
                 .Select(p => new Product
@@ -33,23 +34,30 @@ namespace ProductCatalog.API.Business.Repository
                     ImageUrl = p.ImageUrl
                 })
                 .ToListAsync();
+            _logger.LogDebug("Fetched {Count} products", products.Count);
+            return products;
         }
 
         public async Task<ProductDetail> GetProductByIdAsync(int id)
         {
+            _logger.LogDebug("Fetching product {Id}", id);
             var product = await _context.ProductDetails.Where(x => x.Id.Equals(id)).FirstOrDefaultAsync();
-            return product ?? throw NotFoundException.ForProduct(id);
+                if (product is null)
+                {
+                    _logger.LogInformation("Product {Id} was not found", id);
+                    throw NotFoundException.ForProduct(id);
+                }
+            return product;
         }
 
         public async Task<Metrics> GetProductMetricsAsync()
         {
-            var dbProducts = await _context.ProductDetails
-        .AsNoTracking()
-        .Select(p => new { p.Id, p.Title, p.Price })
-        .ToListAsync();
+            _logger.LogDebug("Computing product metrics");
+            var dbProducts = await _context.ProductDetails.AsNoTracking().Select(p => new { p.Id, p.Title, p.Price }).ToListAsync();
 
             if (!dbProducts.Any())
             {
+                _logger.LogInformation("No products found; returning empty metrics");
                 Metrics metrics = new Metrics();
                 return metrics;
             }

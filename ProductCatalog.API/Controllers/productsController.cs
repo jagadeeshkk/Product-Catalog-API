@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using ProductCatalog.API.Business.IRepository;
 using ProductCatalog.API.Utility.Exception;
@@ -13,10 +14,12 @@ namespace ProductCatalog.API.Controllers
     {
         private readonly ILogger<productsController> _logger;
         private readonly IProductService _productService;
-        public productsController(IProductService productService, ILogger<productsController> logger)
+        private readonly IValidator<int> _productIdValidator;
+        public productsController(IProductService productService, ILogger<productsController> logger, IValidator<int> productIdValidator)
         {
             _logger = logger;
             _productService = productService;
+            _productIdValidator= productIdValidator;
         }
         // GET /api/products
         [HttpGet]
@@ -39,11 +42,18 @@ namespace ProductCatalog.API.Controllers
         // GET /api/products/{id}
         [HttpGet("{id:int}")]
         [ProducesResponseType(typeof(ProductDetail), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetProductById(int id)
         {
             try
             {
+                var validationResult = await _productIdValidator.ValidateAsync(id);
+                if (!validationResult.IsValid)
+                {
+                    _logger.LogWarning("Rejected GetProductById request for invalid id {Id}", id);
+                    return ValidationProblem((ValidationProblemDetails)validationResult.ToDictionary());
+                }
                 var products = await _productService.GetProductByIdAsync(id);
                 return Ok(products);
             }
