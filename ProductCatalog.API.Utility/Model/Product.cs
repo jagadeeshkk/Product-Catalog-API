@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace ProductCatalog.API.Utility.Model
 {
+    [ExcludeFromCodeCoverage]
     public class Product
     {
         [Key]
@@ -22,7 +24,7 @@ namespace ProductCatalog.API.Utility.Model
         [JsonPropertyName("imageUrl")]
         public string ImageUrl { get; set; } = string.Empty;
     }
-
+    [ExcludeFromCodeCoverage]
     public class ProductDetail
     {
         [JsonPropertyName("description")]

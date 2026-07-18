@@ -1,7 +1,9 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 
 namespace ProductCatalog.API.Utility.Model
 {
+    [ExcludeFromCodeCoverage]
     public class Metrics
     {
         [JsonPropertyName("totalProducts")]
@@ -15,6 +17,7 @@ namespace ProductCatalog.API.Utility.Model
         [JsonPropertyName("byPriceUnit")]
         public ByPriceUnit ByPriceUnitProduct { get; set; }
     }
+    [ExcludeFromCodeCoverage]
     public class MostExpensive
     {
         [JsonPropertyName("id")]
@@ -24,6 +27,7 @@ namespace ProductCatalog.API.Utility.Model
         [JsonPropertyName("price")]
         public string Price { get; set; } = string.Empty;
     }
+    [ExcludeFromCodeCoverage]
     public class LeastExpensive
     {
         [JsonPropertyName("id")]
@@ -33,6 +37,7 @@ namespace ProductCatalog.API.Utility.Model
         [JsonPropertyName("price")]
         public string Price { get; set; } = string.Empty;
     }
+    [ExcludeFromCodeCoverage]
     public class ByPriceUnit 
     {
         [JsonPropertyName("/lb")]

@@ -23,6 +23,7 @@ namespace ProductCatalog.API.Business.Repository
         public async Task<List<Product>> GetAllProductsAsync()
         {
             _logger.LogDebug("Fetching all products");
+            try { 
             var products = await _context.ProductDetails
                 .AsNoTracking()
                 .OrderBy(p => p.Id)
@@ -36,99 +37,130 @@ namespace ProductCatalog.API.Business.Repository
                 .ToListAsync();
             _logger.LogDebug("Fetched {Count} products", products.Count);
             return products;
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogError(ex, "Database connection or execution failed while retrieving all products.");
+                throw new ServiceUnavailableException("The product catalog database is currently unavailable.", ex);
+            }
         }
 
         public async Task<ProductDetail> GetProductByIdAsync(int id)
         {
             _logger.LogDebug("Fetching product {Id}", id);
-            var product = await _context.ProductDetails.Where(x => x.Id.Equals(id)).FirstOrDefaultAsync();
-                if (product is null)
-                {
-                    _logger.LogInformation("Product {Id} was not found", id);
-                    throw NotFoundException.ForProduct(id);
-                }
+
+            ProductDetail? product;
+            try
+            {
+                product = await _context.ProductDetails.Where(x => x.Id.Equals(id)).FirstOrDefaultAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogError(ex, "Database lookup failed for product ID {Id}.", id);
+                throw new ServiceUnavailableException($"Database query failed for product ID {id}.", ex);
+            }
+
+            if (product is null)
+            {
+                _logger.LogWarning("Product {Id} was not found in the database", id);
+                throw NotFoundException.ForProduct(id);
+            }
+
             return product;
         }
 
         public async Task<Metrics> GetProductMetricsAsync()
         {
-            _logger.LogDebug("Computing product metrics");
-            var dbProducts = await _context.ProductDetails.AsNoTracking().Select(p => new { p.Id, p.Title, p.Price }).ToListAsync();
-
-            if (!dbProducts.Any())
+            try
             {
-                _logger.LogInformation("No products found; returning empty metrics");
-                Metrics metrics = new Metrics();
-                return metrics;
-            }
+                _logger.LogDebug("Computing product metrics");
+                var dbProducts = await _context.ProductDetails.AsNoTracking().Select(p => new { p.Id, p.Title, p.Price }).ToListAsync();
 
-            var parsedProducts = dbProducts.Select(p =>
-            {
-                decimal numericPrice = 0m;
-                string unit = "/each"; // Default fallback banner
-
-                if (!string.IsNullOrWhiteSpace(p.Price))
+                if (!dbProducts.Any())
                 {
-                    // Extract everything before the '/' and strip the '$' symbol
-                    var parts = p.Price.Split('/');
-                    var numericPart = parts[0].Replace("$", "").Trim();
+                    _logger.LogInformation("No products found; returning empty metrics");
+                    Metrics metrics = new Metrics();
+                    return metrics;
+                }
 
-                    decimal.TryParse(numericPart, out numericPrice);
+                var parsedProducts = dbProducts.Select(p =>
+                {
+                    decimal numericPrice = 0m;
+                    string unit = "/each"; // Default fallback banner
 
-                    if (parts.Length > 1)
+                    if (!string.IsNullOrWhiteSpace(p.Price))
                     {
-                        unit = "/" + parts[1].Trim(); // Reconstruct the unit tag (e.g., "/lb")
+                        // Extract everything before the '/' and strip the '$' symbol
+                        var parts = p.Price.Split('/');
+                        var numericPart = parts[0].Replace("$", "").Trim();
+
+                        decimal.TryParse(numericPart, out numericPrice);
+
+                        if (parts.Length > 1)
+                        {
+                            unit = "/" + parts[1].Trim(); // Reconstruct the unit tag (e.g., "/lb")
+                        }
                     }
-                }
 
-                return new
+                    return new
+                    {
+                        Source = p,
+                        NumericPrice = numericPrice,
+                        Unit = unit
+                    };
+                }).ToList();
+
+                // 3. Aggregate statistics using LINQ
+                var totalProducts = parsedProducts.Count;
+                var averagePrice = Math.Round(parsedProducts.Average(p => p.NumericPrice), 2);
+
+                var mostExpensiveItem = parsedProducts.OrderByDescending(p => p.NumericPrice).First();
+                var leastExpensiveItem = parsedProducts.OrderBy(p => p.NumericPrice).First();
+
+                // Group and count occurrences of each distinct string unit suffix
+                var byPriceUnit = parsedProducts
+                    .GroupBy(p => p.Unit)
+                    .ToDictionary(g => g.Key, g => g.Count());
+
+                // 4. Construct the precise payload matching your schema
+                var analytics = new Metrics
                 {
-                    Source = p,
-                    NumericPrice = numericPrice,
-                    Unit = unit
+                    TotalProducts = totalProducts,
+                    AveragePrice = averagePrice,
+                    MostExpensiveProduct = new MostExpensive
+                    {
+                        Id = mostExpensiveItem.Source.Id,
+                        Title = mostExpensiveItem.Source.Title,
+                        Price = mostExpensiveItem.Source.Price
+                    },
+                    LeastExpensiveProduct = new LeastExpensive
+                    {
+                        Id = leastExpensiveItem.Source.Id,
+                        Title = leastExpensiveItem.Source.Title,
+                        Price = leastExpensiveItem.Source.Price
+                    },
+                    ByPriceUnitProduct = new ByPriceUnit
+                    {
+                        LB = byPriceUnit.Where(x => x.Key.Equals("/lb")).Select(x => x.Value).FirstOrDefault(),
+                        Each = byPriceUnit.Where(x => x.Key.Equals("/each")).Select(x => x.Value).FirstOrDefault(),
+                        Bunch = byPriceUnit.Where(x => x.Key.Equals("/bunch")).Select(x => x.Value).FirstOrDefault(),
+                        Head = byPriceUnit.Where(x => x.Key.Equals("/head")).Select(x => x.Value).FirstOrDefault(),
+                        Bag = byPriceUnit.Where(x => x.Key.Equals("/bag")).Select(x => x.Value).FirstOrDefault()
+                    }
                 };
-            }).ToList();
 
-            // 3. Aggregate statistics using LINQ
-            var totalProducts = parsedProducts.Count;
-            var averagePrice = Math.Round(parsedProducts.Average(p => p.NumericPrice), 2);
-
-            var mostExpensiveItem = parsedProducts.OrderByDescending(p => p.NumericPrice).First();
-            var leastExpensiveItem = parsedProducts.OrderBy(p => p.NumericPrice).First();
-
-            // Group and count occurrences of each distinct string unit suffix
-            var byPriceUnit = parsedProducts
-                .GroupBy(p => p.Unit)
-                .ToDictionary(g => g.Key, g => g.Count());
-
-            // 4. Construct the precise payload matching your schema
-            var analytics = new Metrics
+                return analytics;
+            }
+            catch (DbUpdateException ex)
             {
-                TotalProducts = totalProducts,
-                AveragePrice = averagePrice,
-                MostExpensiveProduct = new MostExpensive
-                {
-                    Id = mostExpensiveItem.Source.Id,
-                    Title = mostExpensiveItem.Source.Title,
-                    Price = mostExpensiveItem.Source.Price
-                },
-                LeastExpensiveProduct = new LeastExpensive
-                {
-                    Id = leastExpensiveItem.Source.Id,
-                    Title = leastExpensiveItem.Source.Title,
-                    Price = leastExpensiveItem.Source.Price
-                },
-                ByPriceUnitProduct = new ByPriceUnit
-                {
-                    LB = byPriceUnit.Where(x => x.Key.Equals("/lb")).Select(x => x.Value).FirstOrDefault(),
-                    Each = byPriceUnit.Where(x => x.Key.Equals("/each")).Select(x => x.Value).FirstOrDefault(),
-                    Bunch = byPriceUnit.Where(x => x.Key.Equals("/bunch")).Select(x => x.Value).FirstOrDefault(),
-                    Head = byPriceUnit.Where(x => x.Key.Equals("/head")).Select(x => x.Value).FirstOrDefault(),
-                    Bag = byPriceUnit.Where(x => x.Key.Equals("/bag")).Select(x => x.Value).FirstOrDefault()
-                }
-            };
-
-            return analytics;
+                _logger.LogError(ex, "Database failure while pulling data fields for aggregate metrics calculation.");
+                throw new ServiceUnavailableException("Could not load products for metrics generation.", ex);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex, "Critical structural error calculating mathematics summaries or compiling dictionary matrices.");
+                throw new MetricCalculationException("An internal mathematical aggregate transformation blew up during compilation.", ex);
+            }
         }
     }
 }

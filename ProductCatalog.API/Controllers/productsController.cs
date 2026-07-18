@@ -25,6 +25,7 @@ namespace ProductCatalog.API.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(Product), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAllProducts()
         {
             try
@@ -34,7 +35,7 @@ namespace ProductCatalog.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while retrieving products.");
+                _logger.LogError(ex, "Failed to retrieve all products");
                 return StatusCode(500, "Internal server error");
             }
         }
@@ -44,6 +45,7 @@ namespace ProductCatalog.API.Controllers
         [ProducesResponseType(typeof(ProductDetail), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetProductById(int id)
         {
             try
@@ -52,7 +54,12 @@ namespace ProductCatalog.API.Controllers
                 if (!validationResult.IsValid)
                 {
                     _logger.LogWarning("Rejected GetProductById request for invalid id {Id}", id);
-                    return ValidationProblem((ValidationProblemDetails)validationResult.ToDictionary());
+                    foreach (var error in validationResult.Errors)
+                    {
+                        ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+                    }
+
+                    return ValidationProblem(ModelState);
                 }
                 var products = await _productService.GetProductByIdAsync(id);
                 return Ok(products);
@@ -64,7 +71,7 @@ namespace ProductCatalog.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while retrieving products.");
+                _logger.LogError(ex, "Failed to retrieve product with ID: {ProductId}", id);
                 return StatusCode(500, "Internal server error");
             }
         }
@@ -72,6 +79,7 @@ namespace ProductCatalog.API.Controllers
         [HttpGet("metrics")]
         [ProducesResponseType(typeof(Metrics), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetProductMetrics()
         {
             try
@@ -81,7 +89,7 @@ namespace ProductCatalog.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while retrieving products.");
+                _logger.LogError(ex, "Failed to retrieve product metrics");
                 return StatusCode(500, "Internal server error");
             }
         }

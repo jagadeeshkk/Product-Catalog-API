@@ -1,11 +1,11 @@
 using Asp.Versioning;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Migrations;
-using Microsoft.Extensions.Options;
 using ProductCatalog.API.Business.IRepository;
 using ProductCatalog.API.Business.Repository;
 using ProductCatalog.API.Data;
 using ProductCatalog.API.Middleware;
+using ProductCatalog.API.Utility.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +18,7 @@ builder.Services.AddDbContext<ProductCatalogDbContext>(options =>
     }); 
 builder.Services.AddTransient<IProductService, ProductService>();
 builder.Services.AddControllers();
+builder.Services.AddTransient<IValidator<int>, ProductIdValidator>();
 builder.Services.AddApiVersioning(options =>
 {
     // Default version to execute if the client does not specify one
