@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ProductCatalog.API.Utility.Exception;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 
 namespace ProductCatalog.API.Middleware
 {
+    [ExcludeFromCodeCoverage]
     public class ExceptionHandlingMiddleware
     {
         private readonly RequestDelegate _next;

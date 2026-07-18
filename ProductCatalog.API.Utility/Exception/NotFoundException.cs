@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ProductCatalog.API.Utility.Exception
+﻿namespace ProductCatalog.API.Utility.Exception
 {
-    public class NotFoundException : IOException
+    public class NotFoundException : global::System.Exception
     {
         public NotFoundException(string message) : base(message)
         {
@@ -12,5 +8,14 @@ namespace ProductCatalog.API.Utility.Exception
 
         public static NotFoundException ForProduct(int id) =>
             new($"Product with id {id} was not found.");
+    }
+    public class ServiceUnavailableException : global::System.Exception
+    {
+        public ServiceUnavailableException(string message, global::System.Exception innerException) : base(message, innerException) { }
+    }
+
+    public class MetricCalculationException : global::System.Exception
+    {
+        public MetricCalculationException(string message, global::System.Exception innerException) : base(message, innerException) { }
     }
 }

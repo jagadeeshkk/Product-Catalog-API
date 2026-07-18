@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace ProductCatalog.API.Utility
 {
+    [ExcludeFromCodeCoverage]
     public static class PriceFormat
     {
         private static readonly Regex Pattern =
