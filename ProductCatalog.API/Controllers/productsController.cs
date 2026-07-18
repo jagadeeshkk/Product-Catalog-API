@@ -16,12 +16,13 @@ namespace ProductCatalog.API.Controllers
             _logger = logger;
             _productService = productService;
         }
-        [HttpGet("api/products")]
+        // GET /api/products
+        [HttpGet]
         public async Task<IActionResult> GetAllProducts()
         {
             try
             {
-                var products = await _productService.GetAllProducts();
+                var products = await _productService.GetAllProductsAsync();
                 return Ok(products);
             }
             catch (Exception ex)
@@ -31,12 +32,13 @@ namespace ProductCatalog.API.Controllers
             }
         }
 
-        [HttpGet("api/products/{id}")]
-        public async Task<IActionResult> GetProductsbyId(int id)
+        // GET /api/products/{id}
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetProductById(int id)
         {
             try
             {
-                var products = await _productService.GetProductbyID(id);
+                var products = await _productService.GetProductByIdAsync(id);
                 return Ok(products);
             }
             catch (Exception ex)
@@ -45,12 +47,13 @@ namespace ProductCatalog.API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
-        [HttpGet("api/products/metrics")]
+        // GET /api/products/metrics
+        [HttpGet("metrics")]
         public async Task<IActionResult> GetProductMetrics()
         {
             try
             {
-                var products = await _productService.GetProductAnalytics();
+                var products = await _productService.GetProductMetricsAsync();
                 return Ok(products);
             }
             catch (Exception ex)
