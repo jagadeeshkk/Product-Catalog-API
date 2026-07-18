@@ -57,7 +57,7 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate();
     var seedLogger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>()
         .CreateLogger("DbSeeder");
-    await DBSeeder.SeedAsync(db, seedLogger);
+    await DbSeeder.SeedAsync(db, seedLogger);
 }
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
