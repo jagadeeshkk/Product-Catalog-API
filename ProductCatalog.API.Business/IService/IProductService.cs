@@ -1,9 +1,6 @@
 ﻿using ProductCatalog.API.Utility.Model;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace ProductCatalog.API.Business.IRepository
+namespace ProductCatalog.API.Business
 {
     public interface IProductService
     {

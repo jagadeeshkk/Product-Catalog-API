@@ -1,14 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using ProductCatalog.API.Business.IRepository;
 using ProductCatalog.API.Data;
 using ProductCatalog.API.Utility.Exception;
 using ProductCatalog.API.Utility.Model;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace ProductCatalog.API.Business.Repository
+namespace ProductCatalog.API.Business
 {
     public class ProductService : IProductService
     {

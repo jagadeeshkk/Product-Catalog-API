@@ -1,8 +1,5 @@
 ﻿using NUnit.Framework.Internal;
 using ProductCatalog.API.Utility.Exception;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ProductCatalog.API.Test
 {
