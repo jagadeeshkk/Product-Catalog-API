@@ -1,7 +1,7 @@
 ﻿using Asp.Versioning;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using ProductCatalog.API.Business.IRepository;
+using ProductCatalog.API.Business;
 using ProductCatalog.API.Utility.Exception;
 using ProductCatalog.API.Utility.Model;
 
@@ -10,12 +10,12 @@ namespace ProductCatalog.API.Controllers
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
-    public class productsController : ControllerBase
+    public class ProductsController : ControllerBase
     {
-        private readonly ILogger<productsController> _logger;
+        private readonly ILogger<ProductsController> _logger;
         private readonly IProductService _productService;
         private readonly IValidator<int> _productIdValidator;
-        public productsController(IProductService productService, ILogger<productsController> logger, IValidator<int> productIdValidator)
+        public ProductsController(IProductService productService, ILogger<ProductsController> logger, IValidator<int> productIdValidator)
         {
             _logger = logger;
             _productService = productService;

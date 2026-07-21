@@ -1,8 +1,7 @@
 using Asp.Versioning;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using ProductCatalog.API.Business.IRepository;
-using ProductCatalog.API.Business.Repository;
+using ProductCatalog.API.Business;
 using ProductCatalog.API.Data;
 using ProductCatalog.API.Middleware;
 using ProductCatalog.API.Utility.Validators;

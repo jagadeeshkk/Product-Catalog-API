@@ -1,16 +1,11 @@
-﻿using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework.Internal;
-using ProductCatalog.API.Business.Repository;
+using ProductCatalog.API.Business;
 using ProductCatalog.API.Data;
 using ProductCatalog.API.Utility.Exception;
 using ProductCatalog.API.Utility.Model;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ProductCatalog.API.Test
 {
