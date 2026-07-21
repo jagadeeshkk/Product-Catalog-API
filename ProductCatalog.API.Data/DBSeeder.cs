@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using ProductCatalog.API.Utility;
 using ProductCatalog.API.Utility.Model;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;

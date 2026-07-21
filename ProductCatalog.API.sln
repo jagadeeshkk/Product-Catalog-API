@@ -5,9 +5,9 @@ VisualStudioVersion = 17.14.36518.9 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductCatalog.API", "ProductCatalog.API\ProductCatalog.API.csproj", "{BA651349-44C1-427A-977A-B033A785180E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductCatalog.API.Business", "ProductCatalog.Business\ProductCatalog.API.Business.csproj", "{7EEBFBB9-D009-4B0A-A1DC-871F1CDADA17}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductCatalog.API.Business", "ProductCatalog.API.Business\ProductCatalog.API.Business.csproj", "{7EEBFBB9-D009-4B0A-A1DC-871F1CDADA17}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductCatalog.API.Data", "ProductCatalog.Data\ProductCatalog.API.Data.csproj", "{CA610877-9042-44D1-B188-298B0EF909DB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductCatalog.API.Data", "ProductCatalog.API.Data\ProductCatalog.API.Data.csproj", "{CA610877-9042-44D1-B188-298B0EF909DB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductCatalog.API.Test", "ProductCatalog.API.Test\ProductCatalog.API.Test.csproj", "{062E94C7-8EE4-4223-BBB7-F5429AC54ADE}"
 EndProject

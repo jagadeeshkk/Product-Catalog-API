@@ -20,8 +20,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ProductCatalog.API.Business\ProductCatalog.API.Business.csproj" />
     <ProjectReference Include="..\ProductCatalog.API\ProductCatalog.API.csproj" />
-    <ProjectReference Include="..\ProductCatalog.Business\ProductCatalog.API.Business.csproj" />
   </ItemGroup>
 
   <ItemGroup>

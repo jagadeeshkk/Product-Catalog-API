@@ -1,7 +1,4 @@
 ﻿using ProductCatalog.API.Utility.Validators;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ProductCatalog.API.Test
 {

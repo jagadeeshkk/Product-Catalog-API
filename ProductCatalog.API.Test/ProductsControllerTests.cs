@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework.Internal;
-using ProductCatalog.API.Business.IRepository;
+using ProductCatalog.API.Business;
 using ProductCatalog.API.Controllers;
 using ProductCatalog.API.Utility.Exception;
 using ProductCatalog.API.Utility.Model;
@@ -16,7 +16,7 @@ namespace ProductCatalog.API.Test
     {
         private Mock<IProductService> _productServiceMock = null!;
         private Mock<IValidator<int>> _validatorMock = null!;
-        private productsController _sut = null!;
+        private ProductsController _sut = null!;
 
         [SetUp]
         public void SetUp()
@@ -29,9 +29,9 @@ namespace ProductCatalog.API.Test
                 .Setup(v => v.ValidateAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ValidationResult());
 
-            _sut = new productsController(
+            _sut = new ProductsController(
                 _productServiceMock.Object,
-                Mock.Of<ILogger<productsController>>(),
+                Mock.Of<ILogger<ProductsController>>(),
                 _validatorMock.Object);
         }
 

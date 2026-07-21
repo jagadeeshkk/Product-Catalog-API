@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ProductCatalog.Business\ProductCatalog.API.Business.csproj" />
+    <ProjectReference Include="..\ProductCatalog.API.Business\ProductCatalog.API.Business.csproj" />
   </ItemGroup>
 
 </Project>
